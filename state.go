@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package fsm implements a finite state machine.
+// Package state implements a finite state machine.
 //
-// It is heavily based on two FSM implementations:
+// It is heavily based on two State implementations:
 //
 // Javascript Finite State Machine
 // https://github.com/jakesgordon/javascript-state-machine
@@ -22,23 +22,23 @@
 // Fysom for Python
 // https://github.com/oxplot/fysom (forked at https://github.com/mriehl/fysom)
 //
-package fsm
+package state
 
 import (
 	"strings"
 	"sync"
 )
 
-// transitioner is an interface for the FSM's transition function.
+// transitioner is an interface for the State's transition function.
 type transitioner interface {
-	transition(*FSM) error
+	transition(*State) error
 }
 
-// FSM is the state machine that holds the current state.
+// State is the state machine that holds the current state.
 //
-// It has to be created with NewFSM to function properly.
-type FSM struct {
-	// current is the state that the FSM is currently in.
+// It has to be created with NewState to function properly.
+type State struct {
+	// current is the state that the State is currently in.
 	current string
 
 	// transitions maps events and source states to destination states.
@@ -50,7 +50,7 @@ type FSM struct {
 	// transition is the internal transition functions used either directly
 	// or when Transition is called in an asynchronous state transition.
 	transition func()
-	// transitionerObj calls the FSM's transition() function.
+	// transitionerObj calls the State's transition() function.
 	transitionerObj transitioner
 
 	// stateMu guards access to the current state.
@@ -59,20 +59,20 @@ type FSM struct {
 	eventMu sync.Mutex
 }
 
-// EventDesc represents an event when initializing the FSM.
+// EventDesc represents an event when initializing the State.
 //
 // The event can have one or more source states that is valid for performing
-// the transition. If the FSM is in one of the source states it will end up in
+// the transition. If the State is in one of the source states it will end up in
 // the specified destination state, calling all defined callbacks as it goes.
 type EventDesc struct {
 	// Name is the event name used when calling for a transition.
 	Name string
 
-	// Src is a slice of source states that the FSM must be in to perform a
+	// Src is a slice of source states that the State must be in to perform a
 	// state transition.
 	Src []string
 
-	// Dst is the destination state that the FSM will be in if the transition
+	// Dst is the destination state that the State will be in if the transition
 	// succeds.
 	Dst string
 }
@@ -81,13 +81,13 @@ type EventDesc struct {
 // event info as the callback happens.
 type Callback func(*Event)
 
-// Events is a shorthand for defining the transition map in NewFSM.
+// Events is a shorthand for defining the transition map in NewState.
 type Events []EventDesc
 
-// Callbacks is a shorthand for defining the callbacks in NewFSM.a
+// Callbacks is a shorthand for defining the callbacks in NewState.a
 type Callbacks map[string]Callback
 
-// NewFSM constructs a FSM from events and callbacks.
+// NewState constructs a State from events and callbacks.
 //
 // The events and transitions are specified as a slice of Event structs
 // specified as Events. Each Event is mapped to one or more internal
@@ -123,8 +123,8 @@ type Callbacks map[string]Callback
 // which version of the callback will end up in the internal map. This is due
 // to the psuedo random nature of Go maps. No checking for multiple keys is
 // currently performed.
-func NewFSM(initial string, events []EventDesc, callbacks map[string]Callback) *FSM {
-	f := &FSM{
+func NewState(initial string, events []EventDesc, callbacks map[string]Callback) *State {
+	f := &State{
 		transitionerObj: &transitionerStruct{},
 		current:         initial,
 		transitions:     make(map[eKey]string),
@@ -198,15 +198,15 @@ func NewFSM(initial string, events []EventDesc, callbacks map[string]Callback) *
 	return f
 }
 
-// Current returns the current state of the FSM.
-func (f *FSM) Current() string {
+// Current returns the current state of the State.
+func (f *State) Current() string {
 	f.stateMu.RLock()
 	defer f.stateMu.RUnlock()
 	return f.current
 }
 
 // Is returns true if state is the current state.
-func (f *FSM) Is(state string) bool {
+func (f *State) Is(state string) bool {
 	f.stateMu.RLock()
 	defer f.stateMu.RUnlock()
 	return state == f.current
@@ -214,7 +214,7 @@ func (f *FSM) Is(state string) bool {
 
 // SetState allows the user to move to the given state from current state.
 // The call does not trigger any callbacks, if defined.
-func (f *FSM) SetState(state string) {
+func (f *State) SetState(state string) {
 	f.stateMu.Lock()
 	defer f.stateMu.Unlock()
 	f.current = state
@@ -222,7 +222,7 @@ func (f *FSM) SetState(state string) {
 }
 
 // Can returns true if event can occur in the current state.
-func (f *FSM) Can(event string) bool {
+func (f *State) Can(event string) bool {
 	f.stateMu.RLock()
 	defer f.stateMu.RUnlock()
 	_, ok := f.transitions[eKey{event, f.current}]
@@ -231,7 +231,7 @@ func (f *FSM) Can(event string) bool {
 
 // Cannot returns true if event can not occure in the current state.
 // It is a convenience method to help code read nicely.
-func (f *FSM) Cannot(event string) bool {
+func (f *State) Cannot(event string) bool {
 	return !f.Can(event)
 }
 
@@ -252,7 +252,7 @@ func (f *FSM) Cannot(event string) bool {
 //
 // The last error should never occur in this situation and is a sign of an
 // internal bug.
-func (f *FSM) Event(event string, args ...interface{}) error {
+func (f *State) Event(event string, args ...interface{}) error {
 	f.eventMu.Lock()
 	defer f.eventMu.Unlock()
 
@@ -314,14 +314,14 @@ func (f *FSM) Event(event string, args ...interface{}) error {
 }
 
 // Transition wraps transitioner.transition.
-func (f *FSM) Transition() error {
+func (f *State) Transition() error {
 	f.eventMu.Lock()
 	defer f.eventMu.Unlock()
 	return f.doTransition()
 }
 
 // doTransition wraps transitioner.transition.
-func (f *FSM) doTransition() error {
+func (f *State) doTransition() error {
 	return f.transitionerObj.transition(f)
 }
 
@@ -333,7 +333,7 @@ type transitionerStruct struct{}
 //
 // The callback for leave_<STATE> must prviously have called Async on its
 // event to have initiated an asynchronous state transition.
-func (t transitionerStruct) transition(f *FSM) error {
+func (t transitionerStruct) transition(f *State) error {
 	if f.transition == nil {
 		return NotInTransitionError{}
 	}
@@ -344,7 +344,7 @@ func (t transitionerStruct) transition(f *FSM) error {
 
 // beforeEventCallbacks calls the before_ callbacks, first the named then the
 // general version.
-func (f *FSM) beforeEventCallbacks(e *Event) error {
+func (f *State) beforeEventCallbacks(e *Event) error {
 	if fn, ok := f.callbacks[cKey{e.Event, callbackBeforeEvent}]; ok {
 		fn(e)
 		if e.canceled {
@@ -362,7 +362,7 @@ func (f *FSM) beforeEventCallbacks(e *Event) error {
 
 // leaveStateCallbacks calls the leave_ callbacks, first the named then the
 // general version.
-func (f *FSM) leaveStateCallbacks(e *Event) error {
+func (f *State) leaveStateCallbacks(e *Event) error {
 	if fn, ok := f.callbacks[cKey{f.current, callbackLeaveState}]; ok {
 		fn(e)
 		if e.canceled {
@@ -384,7 +384,7 @@ func (f *FSM) leaveStateCallbacks(e *Event) error {
 
 // enterStateCallbacks calls the enter_ callbacks, first the named then the
 // general version.
-func (f *FSM) enterStateCallbacks(e *Event) {
+func (f *State) enterStateCallbacks(e *Event) {
 	if fn, ok := f.callbacks[cKey{f.current, callbackEnterState}]; ok {
 		fn(e)
 	}
@@ -395,7 +395,7 @@ func (f *FSM) enterStateCallbacks(e *Event) {
 
 // afterEventCallbacks calls the after_ callbacks, first the named then the
 // general version.
-func (f *FSM) afterEventCallbacks(e *Event) {
+func (f *State) afterEventCallbacks(e *Event) {
 	if fn, ok := f.callbacks[cKey{e.Event, callbackAfterEvent}]; ok {
 		fn(e)
 	}

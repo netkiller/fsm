@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fsm
+package state
 
-// InvalidEventError is returned by FSM.Event() when the event cannot be called
+// InvalidEventError is returned by State.Event() when the event cannot be called
 // in the current state.
 type InvalidEventError struct {
 	Event string
@@ -25,7 +25,7 @@ func (e InvalidEventError) Error() string {
 	return "event " + e.Event + " inappropriate in current state " + e.State
 }
 
-// UnknownEventError is returned by FSM.Event() when the event is not defined.
+// UnknownEventError is returned by State.Event() when the event is not defined.
 type UnknownEventError struct {
 	Event string
 }
@@ -34,7 +34,7 @@ func (e UnknownEventError) Error() string {
 	return "event " + e.Event + " does not exist"
 }
 
-// InTransitionError is returned by FSM.Event() when an asynchronous transition
+// InTransitionError is returned by State.Event() when an asynchronous transition
 // is already in progress.
 type InTransitionError struct {
 	Event string
@@ -44,7 +44,7 @@ func (e InTransitionError) Error() string {
 	return "event " + e.Event + " inappropriate because previous transition did not complete"
 }
 
-// NotInTransitionError is returned by FSM.Transition() when an asynchronous
+// NotInTransitionError is returned by State.Transition() when an asynchronous
 // transition is not in progress.
 type NotInTransitionError struct{}
 
@@ -52,7 +52,7 @@ func (e NotInTransitionError) Error() string {
 	return "transition inappropriate because no state change in progress"
 }
 
-// NoTransitionError is returned by FSM.Event() when no transition have happened,
+// NoTransitionError is returned by State.Event() when no transition have happened,
 // for example if the source and destination states are the same.
 type NoTransitionError struct {
 	Err error
@@ -65,7 +65,7 @@ func (e NoTransitionError) Error() string {
 	return "no transition"
 }
 
-// CanceledError is returned by FSM.Event() when a callback have canceled a
+// CanceledError is returned by State.Event() when a callback have canceled a
 // transition.
 type CanceledError struct {
 	Err error
@@ -78,7 +78,7 @@ func (e CanceledError) Error() string {
 	return "transition canceled"
 }
 
-// AsyncError is returned by FSM.Event() when a callback have initiated an
+// AsyncError is returned by State.Event() when a callback have initiated an
 // asynchronous state transition.
 type AsyncError struct {
 	Err error
@@ -91,7 +91,7 @@ func (e AsyncError) Error() string {
 	return "async started"
 }
 
-// InternalError is returned by FSM.Event() and should never occur. It is a
+// InternalError is returned by State.Event() and should never occur. It is a
 // probably because of a bug.
 type InternalError struct{}
 

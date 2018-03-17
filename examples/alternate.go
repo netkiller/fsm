@@ -4,63 +4,63 @@ package main
 
 import (
 	"fmt"
-	"github.com/looplab/fsm"
+	"github.com/netkiller/state"
 )
 
 func main() {
-	fsm := fsm.NewFSM(
+	state := state.NewState(
 		"idle",
-		fsm.Events{
+		state.Events{
 			{Name: "scan", Src: []string{"idle"}, Dst: "scanning"},
 			{Name: "working", Src: []string{"scanning"}, Dst: "scanning"},
 			{Name: "situation", Src: []string{"scanning"}, Dst: "scanning"},
 			{Name: "situation", Src: []string{"idle"}, Dst: "idle"},
 			{Name: "finish", Src: []string{"scanning"}, Dst: "idle"},
 		},
-		fsm.Callbacks{
-			"scan": func(e *fsm.Event) {
-				fmt.Println("after_scan: " + e.FSM.Current())
+		state.Callbacks{
+			"scan": func(e *state.Event) {
+				fmt.Println("after_scan: " + e.State.Current())
 			},
-			"working": func(e *fsm.Event) {
-				fmt.Println("working: " + e.FSM.Current())
+			"working": func(e *state.Event) {
+				fmt.Println("working: " + e.State.Current())
 			},
-			"situation": func(e *fsm.Event) {
-				fmt.Println("situation: " + e.FSM.Current())
+			"situation": func(e *state.Event) {
+				fmt.Println("situation: " + e.State.Current())
 			},
-			"finish": func(e *fsm.Event) {
-				fmt.Println("finish: " + e.FSM.Current())
+			"finish": func(e *state.Event) {
+				fmt.Println("finish: " + e.State.Current())
 			},
 		},
 	)
 
-	fmt.Println(fsm.Current())
+	fmt.Println(state.Current())
 
-	err := fsm.Event("scan")
+	err := state.Event("scan")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println("1:" + fsm.Current())
+	fmt.Println("1:" + state.Current())
 
-	err = fsm.Event("working")
+	err = state.Event("working")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println("2:" + fsm.Current())
+	fmt.Println("2:" + state.Current())
 
-	err = fsm.Event("situation")
+	err = state.Event("situation")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println("3:" + fsm.Current())
+	fmt.Println("3:" + state.Current())
 
-	err = fsm.Event("finish")
+	err = state.Event("finish")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println("4:" + fsm.Current())
+	fmt.Println("4:" + state.Current())
 
 }

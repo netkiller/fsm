@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fsm
+package state
 
 import (
 	"fmt"
@@ -24,12 +24,12 @@ import (
 type fakeTransitionerObj struct {
 }
 
-func (t fakeTransitionerObj) transition(f *FSM) error {
+func (t fakeTransitionerObj) transition(f *State) error {
 	return &InternalError{}
 }
 
 func TestSameState(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "start"},
@@ -43,7 +43,7 @@ func TestSameState(t *testing.T) {
 }
 
 func TestSetState(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"walking",
 		Events{
 			{Name: "walk", Src: []string{"start"}, Dst: "walking"},
@@ -61,7 +61,7 @@ func TestSetState(t *testing.T) {
 }
 
 func TestBadTransition(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "running"},
@@ -76,7 +76,7 @@ func TestBadTransition(t *testing.T) {
 }
 
 func TestInappropriateEvent(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -91,7 +91,7 @@ func TestInappropriateEvent(t *testing.T) {
 }
 
 func TestInvalidEvent(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -106,7 +106,7 @@ func TestInvalidEvent(t *testing.T) {
 }
 
 func TestMultipleSources(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"one",
 		Events{
 			{Name: "first", Src: []string{"one"}, Dst: "two"},
@@ -136,7 +136,7 @@ func TestMultipleSources(t *testing.T) {
 }
 
 func TestMultipleEvents(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "first", Src: []string{"start"}, Dst: "one"},
@@ -175,7 +175,7 @@ func TestGenericCallbacks(t *testing.T) {
 	enterState := false
 	afterEvent := false
 
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -208,7 +208,7 @@ func TestSpecificCallbacks(t *testing.T) {
 	enterState := false
 	afterEvent := false
 
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -239,7 +239,7 @@ func TestSpecificCallbacksShortform(t *testing.T) {
 	enterState := false
 	afterEvent := false
 
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -263,7 +263,7 @@ func TestSpecificCallbacksShortform(t *testing.T) {
 func TestBeforeEventWithoutTransition(t *testing.T) {
 	beforeEvent := true
 
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "dontrun", Src: []string{"start"}, Dst: "start"},
@@ -289,7 +289,7 @@ func TestBeforeEventWithoutTransition(t *testing.T) {
 }
 
 func TestCancelBeforeGenericEvent(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -307,7 +307,7 @@ func TestCancelBeforeGenericEvent(t *testing.T) {
 }
 
 func TestCancelBeforeSpecificEvent(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -325,7 +325,7 @@ func TestCancelBeforeSpecificEvent(t *testing.T) {
 }
 
 func TestCancelLeaveGenericState(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -343,7 +343,7 @@ func TestCancelLeaveGenericState(t *testing.T) {
 }
 
 func TestCancelLeaveSpecificState(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -361,7 +361,7 @@ func TestCancelLeaveSpecificState(t *testing.T) {
 }
 
 func TestCancelWithError(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -387,7 +387,7 @@ func TestCancelWithError(t *testing.T) {
 }
 
 func TestAsyncTransitionGenericState(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -409,7 +409,7 @@ func TestAsyncTransitionGenericState(t *testing.T) {
 }
 
 func TestAsyncTransitionSpecificState(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -431,7 +431,7 @@ func TestAsyncTransitionSpecificState(t *testing.T) {
 }
 
 func TestAsyncTransitionInProgress(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -456,7 +456,7 @@ func TestAsyncTransitionInProgress(t *testing.T) {
 }
 
 func TestAsyncTransitionNotInProgress(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -471,7 +471,7 @@ func TestAsyncTransitionNotInProgress(t *testing.T) {
 }
 
 func TestCallbackNoError(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -488,7 +488,7 @@ func TestCallbackNoError(t *testing.T) {
 }
 
 func TestCallbackError(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -506,7 +506,7 @@ func TestCallbackError(t *testing.T) {
 }
 
 func TestCallbackArgs(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -530,8 +530,8 @@ func TestCallbackArgs(t *testing.T) {
 }
 
 func TestNoDeadLock(t *testing.T) {
-	var fsm *FSM
-	fsm = NewFSM(
+	var fsm *State
+	fsm = NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -546,7 +546,7 @@ func TestNoDeadLock(t *testing.T) {
 }
 
 func TestThreadSafetyRaceCondition(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -567,10 +567,10 @@ func TestThreadSafetyRaceCondition(t *testing.T) {
 }
 
 func TestDoubleTransition(t *testing.T) {
-	var fsm *FSM
+	var fsm *State
 	var wg sync.WaitGroup
 	wg.Add(2)
-	fsm = NewFSM(
+	fsm = NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "end"},
@@ -606,7 +606,7 @@ func TestDoubleTransition(t *testing.T) {
 }
 
 func TestNoTransition(t *testing.T) {
-	fsm := NewFSM(
+	fsm := NewState(
 		"start",
 		Events{
 			{Name: "run", Src: []string{"start"}, Dst: "start"},
@@ -619,8 +619,8 @@ func TestNoTransition(t *testing.T) {
 	}
 }
 
-func ExampleNewFSM() {
-	fsm := NewFSM(
+func ExampleNewState() {
+	fsm := NewState(
 		"green",
 		Events{
 			{Name: "warn", Src: []string{"green"}, Dst: "yellow"},
@@ -675,8 +675,8 @@ func ExampleNewFSM() {
 	// yellow
 }
 
-func ExampleFSM_Current() {
-	fsm := NewFSM(
+func ExampleState_Current() {
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -688,8 +688,8 @@ func ExampleFSM_Current() {
 	// Output: closed
 }
 
-func ExampleFSM_Is() {
-	fsm := NewFSM(
+func ExampleState_Is() {
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -704,8 +704,8 @@ func ExampleFSM_Is() {
 	// false
 }
 
-func ExampleFSM_Can() {
-	fsm := NewFSM(
+func ExampleState_Can() {
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -720,8 +720,8 @@ func ExampleFSM_Can() {
 	// false
 }
 
-func ExampleFSM_Cannot() {
-	fsm := NewFSM(
+func ExampleState_Cannot() {
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -736,8 +736,8 @@ func ExampleFSM_Cannot() {
 	// true
 }
 
-func ExampleFSM_Event() {
-	fsm := NewFSM(
+func ExampleState_Event() {
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
@@ -762,8 +762,8 @@ func ExampleFSM_Event() {
 	// closed
 }
 
-func ExampleFSM_Transition() {
-	fsm := NewFSM(
+func ExampleState_Transition() {
+	fsm := NewState(
 		"closed",
 		Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},

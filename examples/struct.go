@@ -4,12 +4,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/looplab/fsm"
+	"github.com/netkiller/state"
 )
 
 type Door struct {
 	To  string
-	FSM *fsm.FSM
+	State *state.State
 }
 
 func NewDoor(to string) *Door {
@@ -17,33 +17,33 @@ func NewDoor(to string) *Door {
 		To: to,
 	}
 
-	d.FSM = fsm.NewFSM(
+	d.State = state.NewState(
 		"closed",
-		fsm.Events{
+		state.Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
 			{Name: "close", Src: []string{"open"}, Dst: "closed"},
 		},
-		fsm.Callbacks{
-			"enter_state": func(e *fsm.Event) { d.enterState(e) },
+		state.Callbacks{
+			"enter_state": func(e *state.Event) { d.enterState(e) },
 		},
 	)
 
 	return d
 }
 
-func (d *Door) enterState(e *fsm.Event) {
+func (d *Door) enterState(e *state.Event) {
 	fmt.Printf("The door to %s is %s\n", d.To, e.Dst)
 }
 
 func main() {
 	door := NewDoor("heaven")
 
-	err := door.FSM.Event("open")
+	err := door.State.Event("open")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = door.FSM.Event("close")
+	err = door.State.Event("close")
 	if err != nil {
 		fmt.Println(err)
 	}

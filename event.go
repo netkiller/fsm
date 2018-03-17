@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fsm
+package state
 
 // Event is the info that get passed as a reference in the callbacks.
 type Event struct {
-	// FSM is a reference to the current FSM.
-	FSM *FSM
+	// State is a reference to the current State.
+	State *State
 
 	// Event is the event name.
 	Event string

@@ -1,12 +1,12 @@
-package fsm
+package state
 
 import (
 	"bytes"
 	"fmt"
 )
 
-// Visualize outputs a visualization of a FSM in Graphviz format.
-func Visualize(fsm *FSM) string {
+// Visualize outputs a visualization of a State in Graphviz format.
+func Visualize(fsm *State) string {
 	var buf bytes.Buffer
 
 	states := make(map[string]int)

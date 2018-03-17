@@ -1,20 +1,20 @@
 [![wercker status](https://app.wercker.com/status/517d98fe7a8da9bf9a6060e7906c0d17/s "wercker status")](https://app.wercker.com/project/bykey/517d98fe7a8da9bf9a6060e7906c0d17)
-[![Coverage Status](https://img.shields.io/coveralls/looplab/fsm.svg)](https://coveralls.io/r/looplab/fsm)
-[![GoDoc](https://godoc.org/github.com/looplab/fsm?status.svg)](https://godoc.org/github.com/looplab/fsm)
-[![Go Report Card](https://goreportcard.com/badge/looplab/fsm)](https://goreportcard.com/report/looplab/fsm)
+[![Coverage Status](https://img.shields.io/coveralls/looplab/state.svg)](https://coveralls.io/r/looplab/state)
+[![GoDoc](https://godoc.org/github.com/looplab/state?status.svg)](https://godoc.org/github.com/looplab/state)
+[![Go Report Card](https://goreportcard.com/badge/looplab/state)](https://goreportcard.com/report/looplab/state)
 
 
-# FSM for Go
+# State for Go
 
-FSM is a finite state machine for Go.
+State is a finite state machine for Go.
 
-It is heavily based on two FSM implementations:
+It is heavily based on two State implementations:
 
 - Javascript Finite State Machine, https://github.com/jakesgordon/javascript-state-machine
 
 - Fysom for Python, https://github.com/oxplot/fysom (forked at https://github.com/mriehl/fysom)
 
-For API docs and examples see http://godoc.org/github.com/looplab/fsm
+For API docs and examples see http://godoc.org/github.com/looplab/state
 
 
 # Basic Example
@@ -26,34 +26,34 @@ package main
 
 import (
     "fmt"
-    "github.com/looplab/fsm"
+    "github.com/looplab/state"
 )
 
 func main() {
-    fsm := fsm.NewFSM(
+    state := state.NewState(
         "closed",
-        fsm.Events{
+        state.Events{
             {Name: "open", Src: []string{"closed"}, Dst: "open"},
             {Name: "close", Src: []string{"open"}, Dst: "closed"},
         },
-        fsm.Callbacks{},
+        state.Callbacks{},
     )
 
-    fmt.Println(fsm.Current())
+    fmt.Println(state.Current())
 
-    err := fsm.Event("open")
+    err := state.Event("open")
     if err != nil {
         fmt.Println(err)
     }
 
-    fmt.Println(fsm.Current())
+    fmt.Println(state.Current())
 
-    err = fsm.Event("close")
+    err = state.Event("close")
     if err != nil {
         fmt.Println(err)
     }
 
-    fmt.Println(fsm.Current())
+    fmt.Println(state.Current())
 }
 ```
 
@@ -67,12 +67,12 @@ package main
 
 import (
     "fmt"
-    "github.com/looplab/fsm"
+    "github.com/looplab/state"
 )
 
 type Door struct {
     To  string
-    FSM *fsm.FSM
+    State *state.State
 }
 
 func NewDoor(to string) *Door {
@@ -80,33 +80,33 @@ func NewDoor(to string) *Door {
         To: to,
     }
 
-    d.FSM = fsm.NewFSM(
+    d.State = state.NewState(
         "closed",
-        fsm.Events{
+        state.Events{
             {Name: "open", Src: []string{"closed"}, Dst: "open"},
             {Name: "close", Src: []string{"open"}, Dst: "closed"},
         },
-        fsm.Callbacks{
-            "enter_state": func(e *fsm.Event) { d.enterState(e) },
+        state.Callbacks{
+            "enter_state": func(e *state.Event) { d.enterState(e) },
         },
     )
 
     return d
 }
 
-func (d *Door) enterState(e *fsm.Event) {
+func (d *Door) enterState(e *state.Event) {
     fmt.Printf("The door to %s is %s\n", d.To, e.Dst)
 }
 
 func main() {
     door := NewDoor("heaven")
 
-    err := door.FSM.Event("open")
+    err := door.State.Event("open")
     if err != nil {
         fmt.Println(err)
     }
 
-    err = door.FSM.Event("close")
+    err = door.State.Event("close")
     if err != nil {
         fmt.Println(err)
     }
@@ -116,6 +116,6 @@ func main() {
 
 # License
 
-FSM is licensed under Apache License 2.0
+State is licensed under Apache License 2.0
 
 http://www.apache.org/licenses/LICENSE-2.0

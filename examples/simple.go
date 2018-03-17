@@ -4,32 +4,32 @@ package main
 
 import (
 	"fmt"
-	"github.com/looplab/fsm"
+	"github.com/netkiller/state"
 )
 
 func main() {
-	fsm := fsm.NewFSM(
+	state := state.NewState(
 		"closed",
-		fsm.Events{
+		state.Events{
 			{Name: "open", Src: []string{"closed"}, Dst: "open"},
 			{Name: "close", Src: []string{"open"}, Dst: "closed"},
 		},
-		fsm.Callbacks{},
+		state.Callbacks{},
 	)
 
-	fmt.Println(fsm.Current())
+	fmt.Println(state.Current())
 
-	err := fsm.Event("open")
+	err := state.Event("open")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(fsm.Current())
+	fmt.Println(state.Current())
 
-	err = fsm.Event("close")
+	err = state.Event("close")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(fsm.Current())
+	fmt.Println(state.Current())
 }
