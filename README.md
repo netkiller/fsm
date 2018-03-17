@@ -67,7 +67,7 @@ package main
 
 import (
     "fmt"
-    "github.com/looplab/state"
+    "github.com/netkiller/state"
 )
 
 type Door struct {
